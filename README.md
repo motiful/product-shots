@@ -145,6 +145,49 @@ What happens:
 
 Output: 14 images. The dress is recognizably the *same* dress in every frame — that's the whole point.
 
+## Gallery
+
+Real outputs from `product-shots-*` skills against the OmniMaaS gateway (`gemini-3-pro-image-preview`). Two products, two complete pipelines.
+
+### Smart espresso machine — full Amazon listing flow
+
+<table>
+<tr>
+<td><img src="assets/gallery/coffee-machine/01-main-image.jpeg" width="220"><br><sub><code>product-shots-main-image</code> · Amazon main</sub></td>
+<td><img src="assets/gallery/coffee-machine/02-detail-page-hero.jpeg" width="220"><br><sub><code>product-shots-detail-page</code> · A+ hero band</sub></td>
+<td><img src="assets/gallery/coffee-machine/03-detail-page-feature.jpeg" width="220"><br><sub><code>product-shots-detail-page</code> · feature module</sub></td>
+</tr>
+<tr>
+<td><img src="assets/gallery/coffee-machine/04-ad-creative.jpeg" width="220"><br><sub><code>product-shots-ad-creative</code> · TikTok UGC</sub></td>
+<td><img src="assets/gallery/coffee-machine/05-social-post.jpeg" width="220"><br><sub><code>product-shots-social-post</code> · IG feed</sub></td>
+<td></td>
+</tr>
+</table>
+
+### Floral midi dress — 9-angle identity-locked shoot
+
+The killer demo for `product-shots-multi-angle`: same model, same dress, nine canonical angles, fourteen identity anchors held constant.
+
+<table>
+<tr>
+<td><img src="assets/gallery/dress/01-front.jpeg" width="180"></td>
+<td><img src="assets/gallery/dress/02-three-quarter-front.jpeg" width="180"></td>
+<td><img src="assets/gallery/dress/03-side.jpeg" width="180"></td>
+</tr>
+<tr>
+<td><img src="assets/gallery/dress/04-three-quarter-back.jpeg" width="180"></td>
+<td><img src="assets/gallery/dress/05-back.jpeg" width="180"></td>
+<td><img src="assets/gallery/dress/06-detail.jpeg" width="180"></td>
+</tr>
+<tr>
+<td><img src="assets/gallery/dress/07-on-hanger.jpeg" width="180"></td>
+<td><img src="assets/gallery/dress/08-lifestyle-indoor.jpeg" width="180"></td>
+<td><img src="assets/gallery/dress/09-lifestyle-outdoor.jpeg" width="180"></td>
+</tr>
+</table>
+
+<sub>Every image above is generated end-to-end by <code>product-shots</code> skills via <code>product-shots-image-gen</code> + the OmniMaaS gateway. No manual prompt tuning beyond what the skill emits.</sub>
+
 ---
 
 <!-- ============================================================ -->
