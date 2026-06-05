@@ -88,15 +88,18 @@ Resolved at runtime in this priority order:
 
 **API key:**
 1. `OMNIMAAS_API_KEY` env var (preferred — OmniMaaS / Cloubic gateway)
-2. `RENDER_API_KEY` env var (generic fallback for any OpenAI-SDK-compatible gateway)
-3. `CANVASFLOW_IMAGEGEN_API_KEY` env var (legacy fallback)
-4. `~/.product_shots_render_api_key` file (chmod 600 recommended)
-5. `~/.canvasflow_imagegen_api_key` file (legacy fallback)
+2. `PRODUCT_SHOTS_IMAGEGEN_API_KEY` env var (canonical generic, any OpenAI-SDK-compatible gateway)
+3. `RENDER_API_KEY` env var (short alias)
+4. `CANVASFLOW_IMAGEGEN_API_KEY` env var (legacy fallback)
+5. `~/.product_shots_imagegen_api_key` file (chmod 600 recommended)
+6. `~/.product_shots_render_api_key` file (compat with earlier ship)
+7. `~/.canvasflow_imagegen_api_key` file (legacy fallback)
 
 **Base URL:**
 1. `OMNIMAAS_BASE_URL` env var
-2. `RENDER_BASE_URL` env var (generic fallback)
-3. `CANVASFLOW_IMAGEGEN_BASE_URL` env var (legacy fallback)
-4. Default `https://api.omnimaas.com/v1` when `OMNIMAAS_API_KEY` is set without an explicit base URL
+2. `PRODUCT_SHOTS_IMAGEGEN_BASE_URL` env var (canonical generic)
+3. `RENDER_BASE_URL` env var (short alias)
+4. `CANVASFLOW_IMAGEGEN_BASE_URL` env var (legacy fallback)
+5. Default `https://api.omnimaas.com/v1` when `OMNIMAAS_API_KEY` is set without an explicit base URL
 
 Both API key and base URL are **never echoed**, never written to logs. The skill exits with a clear message if either is missing.

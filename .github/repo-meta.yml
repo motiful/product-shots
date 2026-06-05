@@ -1,0 +1,37 @@
+# GitHub repository metadata — source of truth for `gh repo edit` calls
+# Aligned with README.md one-liner and Features list.
+
+description: >-
+  Open-source Claude Code skills that turn one product photo into a full set of
+  e-commerce visuals — main images, A+ detail pages, multi-angle shoots, social
+  posts, and ad creatives. For cross-border sellers on Amazon, Shopify,
+  TikTok Shop.
+
+# Topic 3-tier system (per readme-craft github-metadata.md):
+#   Tier 1 — protocol / framework
+#   Tier 2 — capability / category
+#   Tier 3 — domain / market
+topics:
+  # Tier 1 — protocol / framework
+  - claude-code
+  - claude-code-skills
+  - agent-skills
+  - anthropic-skills
+
+  # Tier 2 — capability / category
+  - ai-design
+  - ai-image-generation
+  - product-photography
+  - open-source
+  - gemini-nano-banana
+  - gpt-image-2
+
+  # Tier 3 — domain / market
+  - ecommerce
+  - amazon-seller
+  - shopify
+  - tiktok-shop
+  - cross-border-ecommerce
+
+# Homepage URL — leave blank until docs / landing exists
+homepage: ""

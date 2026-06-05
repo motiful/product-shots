@@ -16,8 +16,9 @@ The gateway is OpenAI-SDK-compatible and unifies access to GPT image 2
 (`gemini-3-pro-image-preview`, etc.) behind one auth token.
 
 Fallback: any other OpenAI-SDK-compatible image gateway (set
-RENDER_BASE_URL / RENDER_API_KEY) — also keeps backward compatibility
-with the legacy CANVASFLOW_IMAGEGEN_* env vars.
+PRODUCT_SHOTS_IMAGEGEN_BASE_URL / PRODUCT_SHOTS_IMAGEGEN_API_KEY,
+or the shorter RENDER_BASE_URL / RENDER_API_KEY) — also keeps
+backward compatibility with the legacy CANVASFLOW_IMAGEGEN_* env vars.
 
 Usage:
     # Text-to-image (Gemini, recommended default — Nano Banana Pro)
@@ -38,18 +39,21 @@ Usage:
     python generate.py --prompt "a cat" --model gpt-image-2 --aspect-ratio 3:2
 
 Configuration:
-    OMNIMAAS_API_KEY     — preferred. Token for the OmniMaaS / Cloubic gateway.
-    OMNIMAAS_BASE_URL    — optional. Defaults to https://api.omnimaas.com/v1.
+    OMNIMAAS_API_KEY                — preferred. Token for the OmniMaaS / Cloubic gateway.
+    OMNIMAAS_BASE_URL               — optional. Defaults to https://api.omnimaas.com/v1.
 
-    RENDER_API_KEY       — fallback. Token for any OpenAI-SDK-compatible image gateway.
-    RENDER_BASE_URL      — fallback. The /v1 base URL of that gateway.
+    PRODUCT_SHOTS_IMAGEGEN_API_KEY  — canonical generic. Any OpenAI-SDK-compatible image gateway.
+    PRODUCT_SHOTS_IMAGEGEN_BASE_URL — canonical generic. The /v1 base URL of that gateway.
 
-    CANVASFLOW_IMAGEGEN_API_KEY  — legacy fallback (for migrated installs).
-    CANVASFLOW_IMAGEGEN_BASE_URL — legacy fallback.
+    RENDER_API_KEY                  — alias for PRODUCT_SHOTS_IMAGEGEN_API_KEY (shorter name).
+    RENDER_BASE_URL                 — alias for PRODUCT_SHOTS_IMAGEGEN_BASE_URL.
+
+    CANVASFLOW_IMAGEGEN_API_KEY     — legacy fallback (for migrated installs).
+    CANVASFLOW_IMAGEGEN_BASE_URL    — legacy fallback.
 
 API keys never reach logs or stdout. They are loaded from environment
-variables or from ~/.product_shots_render_api_key (chmod 600) and passed
-only via the Authorization header.
+variables or from ~/.product_shots_imagegen_api_key (chmod 600) and
+passed only via the Authorization header.
 """
 
 import argparse
@@ -67,7 +71,8 @@ from PIL import Image
 # --- Configuration -----------------------------------------------------------
 
 OMNIMAAS_DEFAULT_BASE_URL = "https://api.omnimaas.com/v1"
-API_KEY_PATH = Path.home() / ".product_shots_render_api_key"
+API_KEY_PATH = Path.home() / ".product_shots_imagegen_api_key"
+COMPAT_API_KEY_PATH = Path.home() / ".product_shots_render_api_key"
 LEGACY_API_KEY_PATH = Path.home() / ".canvasflow_imagegen_api_key"
 
 TIMEOUT = 240
@@ -141,25 +146,33 @@ def load_api_key() -> tuple[str, str]:
     """Resolve (api_key, source_label). Priority:
 
     1. OMNIMAAS_API_KEY env var (preferred — OmniMaaS / Cloubic gateway)
-    2. RENDER_API_KEY env var (generic fallback)
-    3. CANVASFLOW_IMAGEGEN_API_KEY env var (legacy)
-    4. ~/.product_shots_render_api_key file
-    5. ~/.canvasflow_imagegen_api_key file (legacy)
+    2. PRODUCT_SHOTS_IMAGEGEN_API_KEY env var (canonical generic)
+    3. RENDER_API_KEY env var (short alias)
+    4. CANVASFLOW_IMAGEGEN_API_KEY env var (legacy)
+    5. ~/.product_shots_imagegen_api_key file
+    6. ~/.product_shots_render_api_key file (compat with earlier ship)
+    7. ~/.canvasflow_imagegen_api_key file (legacy)
     """
-    for env_name in ("OMNIMAAS_API_KEY", "RENDER_API_KEY", "CANVASFLOW_IMAGEGEN_API_KEY"):
+    env_order = (
+        "OMNIMAAS_API_KEY",
+        "PRODUCT_SHOTS_IMAGEGEN_API_KEY",
+        "RENDER_API_KEY",
+        "CANVASFLOW_IMAGEGEN_API_KEY",
+    )
+    for env_name in env_order:
         v = os.environ.get(env_name)
         if v:
             return v.strip(), env_name
-    if API_KEY_PATH.exists():
-        return API_KEY_PATH.read_text().strip(), str(API_KEY_PATH)
-    if LEGACY_API_KEY_PATH.exists():
-        return LEGACY_API_KEY_PATH.read_text().strip(), str(LEGACY_API_KEY_PATH)
+    for path in (API_KEY_PATH, COMPAT_API_KEY_PATH, LEGACY_API_KEY_PATH):
+        if path.exists():
+            return path.read_text().strip(), str(path)
     sys.exit(
         "No API key. Set one of:\n"
-        "  OMNIMAAS_API_KEY     (preferred — OmniMaaS / Cloubic image gateway)\n"
-        "  RENDER_API_KEY       (any OpenAI-SDK-compatible image gateway)\n"
-        "  CANVASFLOW_IMAGEGEN_API_KEY  (legacy)\n"
-        "Or write the key to ~/.product_shots_render_api_key (chmod 600)."
+        "  OMNIMAAS_API_KEY                (preferred — OmniMaaS / Cloubic image gateway)\n"
+        "  PRODUCT_SHOTS_IMAGEGEN_API_KEY  (any OpenAI-SDK-compatible image gateway)\n"
+        "  RENDER_API_KEY                  (short alias)\n"
+        "  CANVASFLOW_IMAGEGEN_API_KEY     (legacy)\n"
+        "Or write the key to ~/.product_shots_imagegen_api_key (chmod 600)."
     )
 
 
@@ -167,13 +180,18 @@ def load_base_url() -> tuple[str, str]:
     """Resolve (base_url, source_label). Priority:
 
     1. OMNIMAAS_BASE_URL env var
-    2. RENDER_BASE_URL env var (generic fallback)
-    3. CANVASFLOW_IMAGEGEN_BASE_URL env var (legacy)
-    4. OmniMaaS default base URL when only OMNIMAAS_API_KEY is set
+    2. PRODUCT_SHOTS_IMAGEGEN_BASE_URL env var (canonical generic)
+    3. RENDER_BASE_URL env var (short alias)
+    4. CANVASFLOW_IMAGEGEN_BASE_URL env var (legacy)
+    5. OmniMaaS default base URL when only OMNIMAAS_API_KEY is set
     """
     omnimaas_url = os.environ.get("OMNIMAAS_BASE_URL")
     if omnimaas_url:
         return omnimaas_url.rstrip("/"), "OMNIMAAS_BASE_URL"
+
+    ps_url = os.environ.get("PRODUCT_SHOTS_IMAGEGEN_BASE_URL")
+    if ps_url:
+        return ps_url.rstrip("/"), "PRODUCT_SHOTS_IMAGEGEN_BASE_URL"
 
     render_url = os.environ.get("RENDER_BASE_URL")
     if render_url:
@@ -189,9 +207,10 @@ def load_base_url() -> tuple[str, str]:
 
     sys.exit(
         "No image gateway base URL configured. Set one of:\n"
-        "  OMNIMAAS_BASE_URL    (defaults to https://api.omnimaas.com/v1 when OMNIMAAS_API_KEY is set)\n"
-        "  RENDER_BASE_URL      (any OpenAI-SDK-compatible image gateway)\n"
-        "  CANVASFLOW_IMAGEGEN_BASE_URL  (legacy)"
+        "  OMNIMAAS_BASE_URL                (defaults to https://api.omnimaas.com/v1 when OMNIMAAS_API_KEY is set)\n"
+        "  PRODUCT_SHOTS_IMAGEGEN_BASE_URL  (any OpenAI-SDK-compatible image gateway)\n"
+        "  RENDER_BASE_URL                  (short alias)\n"
+        "  CANVASFLOW_IMAGEGEN_BASE_URL     (legacy)"
     )
 
 

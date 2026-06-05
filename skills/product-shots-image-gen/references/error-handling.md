@@ -13,7 +13,7 @@ How `scripts/generate.py` reports failures and what the caller should do.
 handle_http_error(family: str, status_code: int, response_body: str) → exit
 
 status == 401 or status == 403:
-    msg = f"{family} API error {status}: bad/missing key. Check ~/.product_shots_render_api_key."
+    msg = f"{family} API error {status}: bad/missing key. Check ~/.product_shots_imagegen_api_key (or env: OMNIMAAS_API_KEY / PRODUCT_SHOTS_IMAGEGEN_API_KEY)."
 status == 429:
     msg = f"{family} API error 429: rate limit. Wait + retry, or check key quota in the upstream image gateway dashboard."
 status == 524:
@@ -46,7 +46,7 @@ if family == "gemini":
 
 | HTTP / Error | Cause | Skill behaviour | Recommended caller action |
 |---|---|---|---|
-| **HTTP 401 / 403** | Missing or invalid API key | exit 1 immediately — **never retried** | Verify `OMNIMAAS_API_KEY` env var (or `RENDER_API_KEY` / `CANVASFLOW_IMAGEGEN_API_KEY` fallbacks, or the file `~/.product_shots_render_api_key`). Regenerate key on the upstream gateway if rotated. |
+| **HTTP 401 / 403** | Missing or invalid API key | exit 1 immediately — **never retried** | Verify `OMNIMAAS_API_KEY` env var (or `PRODUCT_SHOTS_IMAGEGEN_API_KEY` / `RENDER_API_KEY` / `CANVASFLOW_IMAGEGEN_API_KEY` fallbacks, or the file `~/.product_shots_imagegen_api_key`). Regenerate key on the upstream gateway if rotated. |
 | **HTTP 429** | Rate limit / quota | image-to-image: retry up to 3 attempts with 1s/4s/16s backoff. Text-to-image: exit 1 with error body. | If still failing after retries, wait longer and check the per-request usage quota on the API key in the upstream gateway dashboard. |
 | **HTTP 524** | Edge-proxy upstream timeout (almost always reference-image size) | image-to-image: retry up to 3 attempts with backoff. Text-to-image: exit 1 with raw HTML excerpt. | The skill auto-resizes references to ≤1024px / ≤1MB; a persistent 524 means either auto-resize was bypassed or the upstream is genuinely slow. |
 | **HTTP 5xx (other)** | Upstream model error | image-to-image: retry up to 3 attempts with backoff. Text-to-image: exit 1 with response text. | If persistent after retries, log as a model-quality finding and try an alternate model. |

@@ -51,8 +51,8 @@ collect 7_required_fields:
     visual_assets, brand_kit, copy (brand_name / slogan / cta / price)
 missing = [f for f in 7_required_fields if not provided(f)]
 if missing:
-    filled = Skill("hub", f"fill missing fields: {missing}")
-    # `Skill("hub", "fill missing fields: <list>")` — owns Quick Start clarification.
+    filled = Skill("product-shots", f"fill missing fields: {missing}")
+    # `Skill("product-shots", "fill missing fields: <list>")` — the hub/router skill owns Quick Start clarification.
     # ad-creative owns the post-fill workflow. Do not substitute with manual clarification questions.
     assert filled.delivered          # Step 2 requires the filled brief
     user_brief = filled.brief

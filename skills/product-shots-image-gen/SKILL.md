@@ -85,7 +85,7 @@ These rules always apply. Read them before acting.
 6. **Output is always saved to disk and the path returned.** Never return base64 or URL to the caller — the file on disk is the canonical artifact. Default location uses a timestamp; caller can override with `--output`.
 7. **Cost and token usage are logged on every call.** Caller can budget. Estimated rates: gpt-image-2 ≈ ¥0.35/image, gemini-3-pro-image-preview ≈ ¥1/image, gemini-3.1-flash-image-preview ≈ ¥0.20/image.
 8. **Bounded retries for image-to-image; fail-fast everywhere else.** Image-to-image calls retry up to **3 attempts** on retryable errors (HTTP 429, 5xx, 524, connection errors, read timeouts) with exponential backoff (1s, 4s, 16s between attempts). Text-to-image calls do **not** retry. Auth errors (401 / 403) fail fast — never retried. See `references/error-handling.md`.
-9. **API keys never reach logs or stdout.** Loaded from `OMNIMAAS_API_KEY` (preferred), `RENDER_API_KEY` (fallback), `CANVASFLOW_IMAGEGEN_API_KEY` (legacy), or `~/.product_shots_render_api_key` file; passed only via the `Authorization` header. Never echoed. The base URL is auto-resolved (defaults to `https://api.omnimaas.com/v1` when `OMNIMAAS_API_KEY` is set without an explicit `OMNIMAAS_BASE_URL`).
+9. **API keys never reach logs or stdout.** Loaded in this order: `OMNIMAAS_API_KEY` (preferred — UCWS / Cloubic gateway) → `PRODUCT_SHOTS_IMAGEGEN_API_KEY` (canonical generic) → `RENDER_API_KEY` (short alias) → `CANVASFLOW_IMAGEGEN_API_KEY` (legacy) → `~/.product_shots_imagegen_api_key` → `~/.product_shots_render_api_key` (compat) → `~/.canvasflow_imagegen_api_key` (legacy). Passed only via the `Authorization` header. Never echoed. The base URL is auto-resolved (defaults to `https://api.omnimaas.com/v1` when `OMNIMAAS_API_KEY` is set without an explicit `OMNIMAAS_BASE_URL`).
 
 ## Execution Procedure
 
@@ -98,16 +98,19 @@ generate_image(prompt, model, [aspect_ratio], [negative_prompt],
 # Step 0 — Resolve API key + base URL (MUST come first)
 api_key,  key_source = load_api_key()
     # 1. OMNIMAAS_API_KEY env var (preferred — OmniMaaS gateway)
-    # 2. RENDER_API_KEY env var (generic fallback)
-    # 3. CANVASFLOW_IMAGEGEN_API_KEY env var (legacy)
-    # 4. ~/.product_shots_render_api_key file
-    # 5. ~/.canvasflow_imagegen_api_key file (legacy)
+    # 2. PRODUCT_SHOTS_IMAGEGEN_API_KEY env var (canonical generic)
+    # 3. RENDER_API_KEY env var (short alias)
+    # 4. CANVASFLOW_IMAGEGEN_API_KEY env var (legacy)
+    # 5. ~/.product_shots_imagegen_api_key file
+    # 6. ~/.product_shots_render_api_key file (compat)
+    # 7. ~/.canvasflow_imagegen_api_key file (legacy)
     # fail with clear message if none present
 base_url, url_source = load_base_url()
     # 1. OMNIMAAS_BASE_URL env var
-    # 2. RENDER_BASE_URL env var (generic fallback)
-    # 3. CANVASFLOW_IMAGEGEN_BASE_URL env var (legacy)
-    # 4. https://api.omnimaas.com/v1 (default when OMNIMAAS_API_KEY is set)
+    # 2. PRODUCT_SHOTS_IMAGEGEN_BASE_URL env var (canonical generic)
+    # 3. RENDER_BASE_URL env var (short alias)
+    # 4. CANVASFLOW_IMAGEGEN_BASE_URL env var (legacy)
+    # 5. https://api.omnimaas.com/v1 (default when OMNIMAAS_API_KEY is set)
 
 # Step 0a — Validate caller arguments
 args = validate_args(args)                       # see references/parameter-spec.md
@@ -213,9 +216,15 @@ Error Handling                                    → references/error-handling.
 - `scripts/generate.py` — the parameterised entry point. Stdlib + `requests` + `Pillow` only. No host capability requirements.
 - `scripts/setup.sh` — idempotent dependency installer (Python 3 + pip + requests + Pillow). Run once before first use.
 - **No** sub-skill calls. This skill is a leaf: it does not invoke other skills.
-- Callers (other product-shots specialists) invoke via shell:
+- Callers (other product-shots specialists) invoke via shell. Resolve the script path from the host's skill directory rather than hardcoding any platform path:
   ```
-  python ~/.claude/skills/product-shots-image-gen/scripts/generate.py \
+  # Path examples — pick whichever your harness uses; do NOT bake one in:
+  #   Claude Code:  ~/.claude/skills/product-shots-image-gen/scripts/generate.py
+  #   Codex:        ~/.agents/skills/product-shots-image-gen/scripts/generate.py
+  #   Cursor:       ~/.cursor/skills/product-shots-image-gen/scripts/generate.py
+  #   Windsurf:     ~/.codeium/windsurf/skills/product-shots-image-gen/scripts/generate.py
+  #   Copilot:      ~/.copilot/skills/product-shots-image-gen/scripts/generate.py
+  python <skill-dir>/scripts/generate.py \
       --prompt "..." --model gemini-3-pro-image-preview --output ./out.jpeg
   ```
   or via direct Python import of the `generate_openai` / `generate_gemini` functions.

@@ -22,8 +22,8 @@ copy = {brand_name, slogan, cta, price_or_offer}
 missing = [f for f in required_fields if not provided(f)]
 if missing:
     # Verbatim from skill body:
-    # "If any of these are missing, use hub first."
-    invoke hub(state) → fill missing fields
+    # "If any of these are missing, use the product-shots router skill first."
+    invoke product-shots(state) → fill missing fields
     return route_to_design_guide
 
 # Section 5 — Brand Name & User Copy Fidelity
