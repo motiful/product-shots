@@ -17,7 +17,7 @@
 [![License: MIT][license-shield]][license-url]
 [![Skills: 7][skills-count-shield]][skills-anchor]
 [![Agent Skills][skills-shield]][skills-url]
-[![Built with Claude Code][cc-shield]][cc-url]
+[![Platforms: 5][platforms-shield]][platforms-anchor]
 [![Status: alpha][status-shield]][status-anchor]
 
 </div>
@@ -260,19 +260,28 @@ chmod 600 ~/.product_shots_imagegen_api_key
 
 API keys are only ever sent via the `Authorization` header — never logged, never written to stdout. The skill **never asks you to fork the repo or paste your key into chat**.
 
-**Manual registration** (clone + symlink — only if you don't want the `npx skills` route):
+**Manual registration** (clone + symlink — only if you don't want the `npx skills` route). The skills are platform-agnostic — register in whichever Agent Skills harness root your editor uses:
 
 ```bash
 git clone https://github.com/motiful/product-shots ~/skills/product-shots
 
-# Register only in the harness roots you actually use.
-ln -sfn ~/skills/product-shots/skills/product-shots          ~/.claude/skills/product-shots
-ln -sfn ~/skills/product-shots/skills/product-shots-image-gen       ~/.claude/skills/product-shots-image-gen
-ln -sfn ~/skills/product-shots/skills/product-shots-main-image   ~/.claude/skills/product-shots-main-image
-ln -sfn ~/skills/product-shots/skills/product-shots-detail-page  ~/.claude/skills/product-shots-detail-page
-ln -sfn ~/skills/product-shots/skills/product-shots-multi-angle  ~/.claude/skills/product-shots-multi-angle
-ln -sfn ~/skills/product-shots/skills/product-shots-ad-creative  ~/.claude/skills/product-shots-ad-creative
-ln -sfn ~/skills/product-shots/skills/product-shots-social-post  ~/.claude/skills/product-shots-social-post
+SKILLS=(product-shots product-shots-image-gen \
+        product-shots-main-image product-shots-detail-page \
+        product-shots-multi-angle product-shots-ad-creative \
+        product-shots-social-post)
+
+# Pick whichever harness root(s) you actually use:
+# Claude Code   → ~/.claude/skills/
+# Codex         → ~/.agents/skills/
+# Cursor        → ~/.cursor/skills/
+# Windsurf      → ~/.codeium/windsurf/skills/
+# GitHub Copilot (VS Code) → ~/.copilot/skills/
+
+HARNESS=~/.claude/skills    # change to the path for your editor
+mkdir -p "$HARNESS"
+for s in "${SKILLS[@]}"; do
+  ln -sfn ~/skills/product-shots/skills/$s "$HARNESS/$s"
+done
 ```
 
 ## Usage
@@ -360,6 +369,17 @@ Built against the [Agent Skills](https://agentskills.io) protocol — runs in Cl
 
 Issues and PRs welcome. Each skill is independently reviewable — open a PR scoped to one skill at a time. For new platform support (e.g., a new ad network in `product-shots-ad-creative`), include the platform's spec source and a sample render.
 
+## Contact
+
+The skills in this repo are the **open-source surface** of what we build. `motiful` runs an internal stack that goes further — bigger product galleries from a single brand kit, model-locked lookbooks at studio scale, on-prem rendering, brand-asset integration, and managed pipelines for sellers shipping thousands of SKUs.
+
+If you're a cross-border seller, agency, or platform team and any of that is interesting:
+
+- **Commercial / partnerships / custom skills** — [kungfu@motiful.ai](mailto:kungfu@motiful.ai)
+- **Follow what we ship next** — [@whiletrue0x on X](https://x.com/whiletrue0x/)
+
+Bug reports and skill-level feature requests should stay on [GitHub Issues](https://github.com/motiful/product-shots/issues) — the inbox above is for the things issues can't capture.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
@@ -379,7 +399,7 @@ MIT — see [LICENSE](LICENSE).
 [skills-anchor]: #skills
 [skills-shield]: https://img.shields.io/badge/Agent%20Skills-compatible-DA7857?logo=anthropic
 [skills-url]: https://agentskills.io
-[cc-shield]: https://img.shields.io/badge/Built%20with-Claude%20Code-DA7857?logo=anthropic
-[cc-url]: https://claude.ai/code
+[platforms-shield]: https://img.shields.io/badge/platforms-CC%20%C2%B7%20Codex%20%C2%B7%20Cursor%20%C2%B7%20Windsurf%20%C2%B7%20Copilot-5b8def
+[platforms-anchor]: #compatibility
 [status-shield]: https://img.shields.io/badge/status-alpha-orange.svg
 [status-anchor]: #the-problem

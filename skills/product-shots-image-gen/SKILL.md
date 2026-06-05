@@ -28,7 +28,7 @@ The **image-generation engine** of the product-shots ecosystem. A single, parame
 
 Run on every invocation. The resolution order:
 
-1. `OMNIMAAS_API_KEY` (env var, preferred — UCWS hackathon's unified Cloubic / OmniMaaS gateway)
+1. `OMNIMAAS_API_KEY` (env var, preferred — unified Cloubic / OmniMaaS gateway)
 2. `PRODUCT_SHOTS_IMAGEGEN_API_KEY` (env var, generic fallback)
 3. `CANVASFLOW_IMAGEGEN_API_KEY` (env var, legacy compatibility)
 4. `~/.product_shots_imagegen_api_key` (file, chmod 600, one-line key)
@@ -85,7 +85,7 @@ These rules always apply. Read them before acting.
 6. **Output is always saved to disk and the path returned.** Never return base64 or URL to the caller — the file on disk is the canonical artifact. Default location uses a timestamp; caller can override with `--output`.
 7. **Cost and token usage are logged on every call.** Caller can budget. Estimated rates: gpt-image-2 ≈ ¥0.35/image, gemini-3-pro-image-preview ≈ ¥1/image, gemini-3.1-flash-image-preview ≈ ¥0.20/image.
 8. **Bounded retries for image-to-image; fail-fast everywhere else.** Image-to-image calls retry up to **3 attempts** on retryable errors (HTTP 429, 5xx, 524, connection errors, read timeouts) with exponential backoff (1s, 4s, 16s between attempts). Text-to-image calls do **not** retry. Auth errors (401 / 403) fail fast — never retried. See `references/error-handling.md`.
-9. **API keys never reach logs or stdout.** Loaded in this order: `OMNIMAAS_API_KEY` (preferred — UCWS / Cloubic gateway) → `PRODUCT_SHOTS_IMAGEGEN_API_KEY` (canonical generic) → `RENDER_API_KEY` (short alias) → `CANVASFLOW_IMAGEGEN_API_KEY` (legacy) → `~/.product_shots_imagegen_api_key` → `~/.product_shots_render_api_key` (compat) → `~/.canvasflow_imagegen_api_key` (legacy). Passed only via the `Authorization` header. Never echoed. The base URL is auto-resolved (defaults to `https://api.omnimaas.com/v1` when `OMNIMAAS_API_KEY` is set without an explicit `OMNIMAAS_BASE_URL`).
+9. **API keys never reach logs or stdout.** Loaded in this order: `OMNIMAAS_API_KEY` (preferred — Cloubic / OmniMaaS gateway) → `PRODUCT_SHOTS_IMAGEGEN_API_KEY` (canonical generic) → `RENDER_API_KEY` (short alias) → `CANVASFLOW_IMAGEGEN_API_KEY` (legacy) → `~/.product_shots_imagegen_api_key` → `~/.product_shots_render_api_key` (compat) → `~/.canvasflow_imagegen_api_key` (legacy). Passed only via the `Authorization` header. Never echoed. The base URL is auto-resolved (defaults to `https://api.omnimaas.com/v1` when `OMNIMAAS_API_KEY` is set without an explicit `OMNIMAAS_BASE_URL`).
 
 ## Execution Procedure
 

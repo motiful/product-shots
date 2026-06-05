@@ -2,14 +2,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 112">
   <defs>
     <linearGradient id="g" x1="14" y1="0" x2="646" y2="0" gradientUnits="userSpaceOnUse" color-interpolation="linearRGB">
-      <stop offset="0%" stop-color="#833225"/>
-      <stop offset="6%" stop-color="#773800"/>
-      <stop offset="20%" stop-color="#663e00"/>
-      <stop offset="39%" stop-color="#524300"/>
-      <stop offset="61%" stop-color="#3c4607"/>
-      <stop offset="80%" stop-color="#25461f"/>
-      <stop offset="94%" stop-color="#0e442f"/>
-      <stop offset="100%" stop-color="#003f39"/>
+      <stop offset="0%" stop-color="#ff4365"/>
+      <stop offset="20%" stop-color="#ff8c42"/>
+      <stop offset="40%" stop-color="#ffd23f"/>
+      <stop offset="60%" stop-color="#06d6a0"/>
+      <stop offset="80%" stop-color="#00b4d8"/>
+      <stop offset="100%" stop-color="#5b8def"/>
     </linearGradient>
   </defs>
   <g fill="url(#g)">

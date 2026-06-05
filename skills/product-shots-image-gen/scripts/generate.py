@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""product-shots `render` — unified image-generation engine.
+"""product-shots-image-gen — unified image-generation engine.
 
 Dispatches to OpenAI-compatible image endpoints or Gemini chat-multimodal
 endpoints based on the requested model. Returns a single saved file on
@@ -110,14 +110,14 @@ def post_with_i2i_retry(url, *, headers, **kwargs):
         if attempt < I2I_MAX_ATTEMPTS:
             sleep_s = I2I_BACKOFF_SCHEDULE[attempt - 1]
             print(
-                f"[render] i2i retry: attempt {attempt}/{I2I_MAX_ATTEMPTS} "
+                f"[image-gen] i2i retry: attempt {attempt}/{I2I_MAX_ATTEMPTS} "
                 f"failed ({reason}); sleeping {sleep_s}s before retry",
                 file=sys.stderr,
             )
             time.sleep(sleep_s)
         else:
             print(
-                f"[render] i2i retry: attempt {attempt}/{I2I_MAX_ATTEMPTS} "
+                f"[image-gen] i2i retry: attempt {attempt}/{I2I_MAX_ATTEMPTS} "
                 f"failed ({reason}); giving up",
                 file=sys.stderr,
             )
@@ -244,7 +244,7 @@ def maybe_resize(path: Path) -> Path:
             im.save(tmp, **save_kwargs)
     orig_kb = path.stat().st_size // 1024
     new_kb = tmp.stat().st_size // 1024
-    print(f"[render] auto-resized {path.name}: {orig_kb}KB -> {new_kb}KB ({REF_MAX_DIM}px max)")
+    print(f"[image-gen] auto-resized {path.name}: {orig_kb}KB -> {new_kb}KB ({REF_MAX_DIM}px max)")
     return tmp
 
 
@@ -327,7 +327,7 @@ def generate_gemini(prompt, model, ref_images, api_key, base_url) -> tuple[bytes
 
 def main():
     p = argparse.ArgumentParser(
-        description="product-shots `render` — unified image generator (OpenAI + Gemini families via OmniMaaS or any compatible gateway)",
+        description="product-shots-image-gen — unified image generator (OpenAI + Gemini families via OmniMaaS or any compatible gateway)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
@@ -390,11 +390,11 @@ def main():
     final_prompt = compose_prompt(args.prompt, args.negative_prompt, args.aspect_ratio, family)
 
     print(
-        f"[render] gateway={url_source} key_source={key_source} "
+        f"[image-gen] gateway={url_source} key_source={key_source} "
         f"model={args.model} family={family} "
         f"refs={len(ref_paths)} aspect={args.aspect_ratio or 'default'}"
     )
-    print(f"[render] prompt='{final_prompt[:120]}'")
+    print(f"[image-gen] prompt='{final_prompt[:120]}'")
     t0 = time.time()
 
     if family == "openai":
@@ -415,7 +415,7 @@ def main():
 
     tokens = usage.get("total_tokens", "?")
     print(
-        f"[render] OK {elapsed:.1f}s | {len(img_bytes):,} bytes | "
+        f"[image-gen] OK {elapsed:.1f}s | {len(img_bytes):,} bytes | "
         f"tokens={tokens} | {out}"
     )
 
