@@ -56,13 +56,13 @@ Seven skills, ordered by what carries the most weight in a real listing. The fir
 
 | Skill | What you get |
 |---|---|
-| [`multi-angle`](#skills) | One reference photo → **9 consistent angles** of the same SKU. Fourteen identity anchors (material, stitching, hardware, color cast, proportions, …) lock so the front-3/4 shot and the back shot read as the same product. The killer feature for fashion, bags, and jewelry. |
-| [`detail-page`](#skills) | A full **A+ Content** detail-page module set — hero band, feature grid, lifestyle scene, size/spec callouts — with cross-image consistency anchors so the SKU doesn't morph between modules. |
-| [`main-image`](#skills) | Marketplace-compliant **main + secondary images**. Amazon's 9 mandatory rules (pure white, ≥85% frame fill, no text/logos/watermarks, even studio light, apparel exceptions) are encoded as prompt fields — compliance is decided before the model renders, not patched after. Auto-adapts to category-specific norms (electronics vs apparel vs grocery). |
-| [`ad-creative`](#skills) | Platform-native ad creatives across **8 platforms × 21 formats** — Meta, TikTok, Google Display, Google Demand Gen, YouTube, Pinterest, LinkedIn, X. Per-platform style profiles, banned-words filter, user copy preserved verbatim. |
-| [`social-post`](#skills) | Feed / Story / Reel / Carousel posts with industry-aware DNA (beauty vs hardware vs apparel each get a different visual language) and a 14-point self-check before render. |
-| [`render`](#skills) | The shared **image-gen engine**. One API surface across OpenAI `gpt-image-2`, Gemini `gemini-3-pro-image-preview`, and Flux families. OmniMaaS-gateway compatible — endpoint is one env var, no vendor lock-in. Auto-resizes oversize references, retries with sane backoff. |
-| [`hub`](#skills) | The **intent router** at the front door. Four-stage clarification (≤4 rounds), Visual DNA injection (platform × industry), then dispatch to one of the five business skills above. Stops underspecified prompts from wasting a render. |
+| [`product-shots-multi-angle`](#skills) | One reference photo → **9 consistent angles** of the same SKU. Fourteen identity anchors (material, stitching, hardware, color cast, proportions, …) lock so the front-3/4 shot and the back shot read as the same product. The killer feature for fashion, bags, and jewelry. |
+| [`product-shots-detail-page`](#skills) | A full **A+ Content** detail-page module set — hero band, feature grid, lifestyle scene, size/spec callouts — with cross-image consistency anchors so the SKU doesn't morph between modules. |
+| [`product-shots-main-image`](#skills) | Marketplace-compliant **main + secondary images**. Amazon's 9 mandatory rules (pure white, ≥85% frame fill, no text/logos/watermarks, even studio light, apparel exceptions) are encoded as prompt fields — compliance is decided before the model renders, not patched after. Auto-adapts to category-specific norms (electronics vs apparel vs grocery). |
+| [`product-shots-ad-creative`](#skills) | Platform-native ad creatives across **8 platforms × 21 formats** — Meta, TikTok, Google Display, Google Demand Gen, YouTube, Pinterest, LinkedIn, X. Per-platform style profiles, banned-words filter, user copy preserved verbatim. |
+| [`product-shots-social-post`](#skills) | Feed / Story / Reel / Carousel posts with industry-aware DNA (beauty vs hardware vs apparel each get a different visual language) and a 14-point self-check before render. |
+| [`product-shots-image-gen`](#skills) | The shared **image-gen engine**. One API surface across OpenAI `gpt-image-2`, Gemini `gemini-3-pro-image-preview`, and Flux families. OmniMaaS-gateway compatible — endpoint is one env var, no vendor lock-in. Auto-resizes oversize references, retries with sane backoff. |
+| [`product-shots`](#skills) | The **intent router** at the front door. Four-stage clarification (≤4 rounds), Visual DNA injection (platform × industry), then dispatch to one of the five business skills above. Stops underspecified prompts from wasting a render. |
 
 > **What product-shots is not:** a generic design tool. It does not write copy, build landing pages, or replace a brand designer. Every skill is sharpened around one job in a cross-border seller's daily workflow.
 
@@ -76,7 +76,7 @@ Three distinct operations. Pick the one that matches your job:
 "Make cross-platform ad creatives for this product"          — Meta + TikTok + Google + YouTube variants in correct ratios, platform style applied, copy preserved verbatim.
 ```
 
-Each command lands in `hub`, which clarifies what's missing (≤4 rounds), injects platform × industry Visual DNA, and dispatches to the right specialist. The render goes through the shared `render` engine.
+Each command lands in `product-shots`, which clarifies what's missing (≤4 rounds), injects platform × industry Visual DNA, and dispatches to the right specialist. The render goes through the shared `product-shots-image-gen` engine.
 
 ## Install
 
@@ -86,7 +86,7 @@ npx skills add motiful/product-shots
 
 This registers the seven skills with whichever Agent Skills harness you're running (Claude Code, Codex, Cursor, Windsurf, GitHub Copilot).
 
-**Configure the image backend** — `render` reads two env vars. Point them at any OpenAI-SDK-compatible image gateway (an aggregator that exposes `gpt-image-2` + `gemini-3-pro-image-preview`):
+**Configure the image backend** — `product-shots-image-gen` reads two env vars. Point them at any OpenAI-SDK-compatible image gateway (an aggregator that exposes `gpt-image-2` + `gemini-3-pro-image-preview`):
 
 ```bash
 export PRODUCT_SHOTS_IMAGEGEN_BASE_URL='https://your-image-gateway.example.com/v1'
@@ -101,13 +101,13 @@ API keys are only ever sent via the `Authorization` header — never logged, nev
 git clone https://github.com/motiful/product-shots ~/skills/product-shots
 
 # Register only in the harness roots you actually use.
-ln -sfn ~/skills/product-shots/skills/hub          ~/.claude/skills/hub
-ln -sfn ~/skills/product-shots/skills/render       ~/.claude/skills/render
-ln -sfn ~/skills/product-shots/skills/main-image   ~/.claude/skills/main-image
-ln -sfn ~/skills/product-shots/skills/detail-page  ~/.claude/skills/detail-page
-ln -sfn ~/skills/product-shots/skills/multi-angle  ~/.claude/skills/multi-angle
-ln -sfn ~/skills/product-shots/skills/ad-creative  ~/.claude/skills/ad-creative
-ln -sfn ~/skills/product-shots/skills/social-post  ~/.claude/skills/social-post
+ln -sfn ~/skills/product-shots/skills/product-shots          ~/.claude/skills/product-shots
+ln -sfn ~/skills/product-shots/skills/product-shots-image-gen       ~/.claude/skills/product-shots-image-gen
+ln -sfn ~/skills/product-shots/skills/product-shots-main-image   ~/.claude/skills/product-shots-main-image
+ln -sfn ~/skills/product-shots/skills/product-shots-detail-page  ~/.claude/skills/product-shots-detail-page
+ln -sfn ~/skills/product-shots/skills/product-shots-multi-angle  ~/.claude/skills/product-shots-multi-angle
+ln -sfn ~/skills/product-shots/skills/product-shots-ad-creative  ~/.claude/skills/product-shots-ad-creative
+ln -sfn ~/skills/product-shots/skills/product-shots-social-post  ~/.claude/skills/product-shots-social-post
 ```
 
 ## Usage
@@ -121,12 +121,12 @@ Two real scenarios, end-to-end. Both start from a single reference photo in your
 > give me the full Amazon listing — main, 6 secondaries, A+ page, and 4 ad creatives
 ```
 
-What `hub` will do, in order:
+What `product-shots` will do, in order:
 
 1. **Clarify** category (small kitchen appliance), market (US Amazon), brand voice in ≤4 questions.
-2. **Dispatch** `main-image` → 7 compliant images, white-background, ≥85% fill, no overlay text on the main.
-3. **Dispatch** `detail-page` → A+ hero band + 3 feature modules + 1 lifestyle scene + 1 spec callout. Same SKU across all six modules — no model drift.
-4. **Dispatch** `ad-creative` → 4 variants targeting Meta feed, Meta story, TikTok feed, YouTube short. Each in correct ratio with platform-native styling.
+2. **Dispatch** `product-shots-main-image` → 7 compliant images, white-background, ≥85% fill, no overlay text on the main.
+3. **Dispatch** `product-shots-detail-page` → A+ hero band + 3 feature modules + 1 lifestyle scene + 1 spec callout. Same SKU across all six modules — no model drift.
+4. **Dispatch** `product-shots-ad-creative` → 4 variants targeting Meta feed, Meta story, TikTok feed, YouTube short. Each in correct ratio with platform-native styling.
 
 Output: 18 PNGs, organized by skill, ready to upload.
 
@@ -139,9 +139,9 @@ Output: 18 PNGs, organized by skill, ready to upload.
 
 What happens:
 
-1. `hub` confirms this is apparel (triggers `multi-angle`'s 14-anchor fashion profile, not the generic one).
-2. `multi-angle` locks fabric drape, neckline, sleeve length, pattern repeat, color cast, model proportions, lighting — then renders front / 3/4 front / side / 3/4 back / back / detail (closeup) / on-hanger / lifestyle (indoor) / lifestyle (outdoor).
-3. `social-post` applies the apparel industry DNA preset (editorial, warm-neutral palette, type hierarchy) and produces 3 feed posts (1:1) + 2 stories (9:16), all derived from the same 9-angle set so the campaign reads as one shoot.
+1. `product-shots` confirms this is apparel (triggers `product-shots-multi-angle`'s 14-anchor fashion profile, not the generic one).
+2. `product-shots-multi-angle` locks fabric drape, neckline, sleeve length, pattern repeat, color cast, model proportions, lighting — then renders front / 3/4 front / side / 3/4 back / back / detail (closeup) / on-hanger / lifestyle (indoor) / lifestyle (outdoor).
+3. `product-shots-social-post` applies the apparel industry DNA preset (editorial, warm-neutral palette, type hierarchy) and produces 3 feed posts (1:1) + 2 stories (9:16), all derived from the same 9-angle set so the campaign reads as one shoot.
 
 Output: 14 images. The dress is recognizably the *same* dress in every frame — that's the whole point.
 
@@ -153,21 +153,21 @@ Output: 14 images. The dress is recognizably the *same* dress in every frame —
 
 ## Skills
 
-Each skill is self-contained — a `SKILL.md` plus its `references/` and `scripts/`. Trigger phrases below are the canonical ones; `hub` accepts free-form natural-language variants and routes on intent, not exact wording.
+Each skill is self-contained — a `SKILL.md` plus its `references/` and `scripts/`. Trigger phrases below are the canonical ones; `product-shots` accepts free-form natural-language variants and routes on intent, not exact wording.
 
 | Skill | Trigger | Primary deliverable |
 |---|---|---|
-| `hub` | (front door for all of the below) | Clarified, DNA-injected dispatch to one specialist |
-| `multi-angle` | "9-angle shoot of this product" | 9 identity-locked angles of one SKU |
-| `detail-page` | "build an A+ detail page for this" | Hero + feature + lifestyle + spec modules, consistent SKU |
-| `main-image` | "Amazon main image for this product" | Marketplace-compliant main + secondary set |
-| `ad-creative` | "cross-platform ad creatives" | 8-platform × 21-format ad variants |
-| `social-post` | "Instagram / TikTok posts for this" | Feed / Story / Reel / Carousel with industry DNA |
-| `render` | (called by the others; or `"just generate: <prompt>"`) | Raw image generation across OpenAI / Gemini / Flux |
+| `product-shots` | (front door for all of the below) | Clarified, DNA-injected dispatch to one specialist |
+| `product-shots-multi-angle` | "9-angle shoot of this product" | 9 identity-locked angles of one SKU |
+| `product-shots-detail-page` | "build an A+ detail page for this" | Hero + feature + lifestyle + spec modules, consistent SKU |
+| `product-shots-main-image` | "Amazon main image for this product" | Marketplace-compliant main + secondary set |
+| `product-shots-ad-creative` | "cross-platform ad creatives" | 8-platform × 21-format ad variants |
+| `product-shots-social-post` | "Instagram / TikTok posts for this" | Feed / Story / Reel / Carousel with industry DNA |
+| `product-shots-image-gen` | (called by the others; or `"just generate: <prompt>"`) | Raw image generation across OpenAI / Gemini / Flux |
 
 ## How It Works
 
-`product-shots` pushes the hard work — compliance rules, platform specs, identity anchors, banned-words — **upstream of the model** as prompt fields. Compliance becomes a verifiable intermediate artifact, not a post-hoc check. Model selection is part of the skill, not the user's job: CJK long headlines and photoreal UGC route to `gpt-image-2`; golden-hour lifestyle photoreal routes to `gemini-3-pro-image-preview`. The `render` engine handles the actual dispatch, retries oversized references, and falls back across providers when one returns an empty image.
+`product-shots` pushes the hard work — compliance rules, platform specs, identity anchors, banned-words — **upstream of the model** as prompt fields. Compliance becomes a verifiable intermediate artifact, not a post-hoc check. Model selection is part of the skill, not the user's job: CJK long headlines and photoreal UGC route to `gpt-image-2`; golden-hour lifestyle photoreal routes to `gemini-3-pro-image-preview`. The `product-shots-image-gen` engine handles the actual dispatch, retries oversized references, and falls back across providers when one returns an empty image.
 
 → [Architecture notes](docs/how-it-works.md)
 
@@ -175,13 +175,13 @@ Each skill is self-contained — a `SKILL.md` plus its `references/` and `script
 
 ```text
 skills/
-  hub/            — intent router (4-stage clarification + Visual DNA injection)
-  render/         — unified image-gen engine (OpenAI / Gemini / Flux)
-  main-image/     — Amazon 9 MUST rules + category profiles
-  detail-page/    — A+ module set with cross-image consistency anchors
-  multi-angle/    — 14-anchor identity lock, fashion/bags/jewelry profiles
-  ad-creative/    — 8 platforms × 21 formats, banned-words filter
-  social-post/    — 7-industry DNA presets, 14-point self-check
+  product-shots/              — intent router (4-stage clarification + Visual DNA injection)
+  product-shots-image-gen/    — unified image-gen engine (OpenAI / Gemini / Flux)
+  product-shots-main-image/   — Amazon 9 MUST rules + category profiles
+  product-shots-detail-page/  — A+ module set with cross-image consistency anchors
+  product-shots-multi-angle/  — 14-anchor identity lock, fashion/bags/jewelry profiles
+  product-shots-ad-creative/  — 8 platforms × 21 formats, banned-words filter
+  product-shots-social-post/  — 7-industry DNA presets, 14-point self-check
 .github/          — logo (light/dark), repo metadata
 LICENSE           — MIT
 ```
@@ -192,7 +192,7 @@ Built against the [Agent Skills](https://agentskills.io) protocol — runs in Cl
 
 ## Contributing
 
-Issues and PRs welcome. Each skill is independently reviewable — open a PR scoped to one skill at a time. For new platform support (e.g., a new ad network in `ad-creative`), include the platform's spec source and a sample render.
+Issues and PRs welcome. Each skill is independently reviewable — open a PR scoped to one skill at a time. For new platform support (e.g., a new ad network in `product-shots-ad-creative`), include the platform's spec source and a sample render.
 
 ## License
 
